@@ -132,6 +132,9 @@ const QgsSettingsEntryBool *QgsSettingsRegistryCore::settingsLayerTreeShowFeatur
 const QgsSettingsEntryBool *QgsSettingsRegistryCore::settingsLayerTreeShowLegendClassifiers
   = new QgsSettingsEntryBool( u"show-legend-classifiers"_s, QgsSettingsTree::sTreeLayerTree, false, u"If true, classification attribute name is shown in the legend."_s );
 
+const QgsSettingsEntryBool *QgsSettingsRegistryCore::settingsLayerTreeShowIdInLayerTooltips
+  = new QgsSettingsEntryBool( u"show-id-in-layer-tooltips"_s, QgsSettingsTree::sTreeLayerTree, false, u"If true, layer IDs will be shown in the layer tooltips."_s );
+
 const QgsSettingsEntryBool *QgsSettingsRegistryCore::settingsEnableWMSTilePrefetching
   = new QgsSettingsEntryBool( u"enable_wms_tile_prefetch"_s, QgsSettingsTree::sTreeWms, false, u"Whether to include WMS layers when rendering tiles adjacent to the visible map area"_s );
 

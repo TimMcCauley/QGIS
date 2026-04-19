@@ -61,7 +61,14 @@ class GUI_EXPORT QgsMaterialSettingsWidget : public QWidget
      *
      * Caller takes ownership of the returned settings.
      */
-    virtual QgsAbstractMaterialSettings *settings() = 0 SIP_FACTORY;
+    virtual std::unique_ptr< QgsAbstractMaterialSettings > settings() = 0 SIP_FACTORY;
+
+  public slots:
+
+    /**
+     * Sets whether the material preview widget should be visible.
+     */
+    virtual void setPreviewVisible( bool visible ) = 0;
 
   signals:
 

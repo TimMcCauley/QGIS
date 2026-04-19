@@ -369,8 +369,10 @@ if (WITH_3D)
     3d/qgsgoochmaterialwidget.cpp
     3d/qgslightswidget.cpp
     3d/qgsline3dsymbolwidget.cpp
+    3d/qgsmaterialpreviewwidget.cpp
     3d/qgsmesh3dsymbolwidget.cpp
     3d/qgsmetalroughmaterialwidget.cpp
+    3d/qgsmetalroughtexturedmaterialwidget.cpp
     3d/qgsnullmaterialwidget.cpp
     3d/qgspoint3dsymbolwidget.cpp
     3d/qgspolygon3dsymbolwidget.cpp

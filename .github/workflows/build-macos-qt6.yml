@@ -40,7 +40,7 @@ jobs:
           persist-credentials: false
 
       - name: 🐩 Install CMake and Ninja
-        uses: lukka/get-cmake@b78306120111dc2522750771cfd09ee7ca723687 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
           # Pin to specific version to avoid rebuilding too often
           # Also helps to avoid spurious build failures like https://github.com/qgis/QGIS/pull/47098
@@ -244,6 +244,15 @@ jobs:
         with:
           files: '*.dmg'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger notarization
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.NOTARIZE_TOKEN }}" \
+            https://api.github.com/repos/qgis/qgis-notarize/dispatches \
+            -d '{"event_type":"notarize_dmg","client_payload":{"release_tag":"${{ github.ref_name }}"}}'
 
       - name: Schedule download comment
         uses: ./.github/actions/post_sticky_comment

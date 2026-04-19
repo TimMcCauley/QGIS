@@ -18,13 +18,20 @@
 #include "qgis.h"
 #include "qgsphongmaterialsettings.h"
 
+#include <QString>
+
 #include "moc_qgsphongmaterialwidget.cpp"
+
+using namespace Qt::StringLiterals;
 
 QgsPhongMaterialWidget::QgsPhongMaterialWidget( QWidget *parent, bool hasOpacity )
   : QgsMaterialSettingsWidget( parent )
   , mHasOpacity( hasOpacity )
 {
   setupUi( this );
+  mPreviewWidget->hide();
+  mPreviewWidget->setMaterialType( u"phong"_s );
+
   mOpacityWidget->setVisible( mHasOpacity );
   mLblOpacity->setVisible( mHasOpacity );
   spinShininess->setClearValue( 0, tr( "None" ) );
@@ -55,6 +62,8 @@ QgsPhongMaterialWidget::QgsPhongMaterialWidget( QWidget *parent, bool hasOpacity
   {
     connect( mOpacityWidget, &QgsOpacityWidget::opacityChanged, this, &QgsPhongMaterialWidget::changed );
   }
+
+  connect( this, &QgsPhongMaterialWidget::changed, this, &QgsPhongMaterialWidget::updatePreview );
 }
 
 QgsMaterialSettingsWidget *QgsPhongMaterialWidget::create()
@@ -133,9 +142,10 @@ void QgsPhongMaterialWidget::setSettings( const QgsAbstractMaterialSettings *set
   mSpecularDataDefinedButton->init( static_cast<int>( QgsAbstractMaterialSettings::Property::Specular ), mPropertyCollection, settings->propertyDefinitions(), layer, true );
 
   updateWidgetState();
+  updatePreview();
 }
 
-QgsAbstractMaterialSettings *QgsPhongMaterialWidget::settings()
+std::unique_ptr<QgsAbstractMaterialSettings> QgsPhongMaterialWidget::settings()
 {
   auto m = std::make_unique<QgsPhongMaterialSettings>();
   m->setDiffuse( btnDiffuse->color() );
@@ -155,7 +165,7 @@ QgsAbstractMaterialSettings *QgsPhongMaterialWidget::settings()
   mPropertyCollection.setProperty( QgsAbstractMaterialSettings::Property::Specular, mSpecularDataDefinedButton->toProperty() );
   m->setDataDefinedProperties( mPropertyCollection );
 
-  return m.release();
+  return m;
 }
 
 void QgsPhongMaterialWidget::setHasOpacity( const bool opacity )
@@ -178,6 +188,12 @@ void QgsPhongMaterialWidget::setHasOpacity( const bool opacity )
   }
 }
 
+void QgsPhongMaterialWidget::setPreviewVisible( bool visible )
+{
+  mPreviewWidget->setVisible( visible );
+  updatePreview();
+}
+
 void QgsPhongMaterialWidget::updateWidgetState()
 {
   if ( spinShininess->value() > 0 )
@@ -190,4 +206,12 @@ void QgsPhongMaterialWidget::updateWidgetState()
     btnSpecular->setEnabled( false );
     btnSpecular->setToolTip( tr( "Specular color is disabled because material has no shininess" ) );
   }
+}
+
+void QgsPhongMaterialWidget::updatePreview()
+{
+  if ( mPreviewWidget->isHidden() )
+    return;
+  const std::unique_ptr<QgsAbstractMaterialSettings> newSettings( settings() );
+  mPreviewWidget->updatePreview( newSettings.get() );
 }

@@ -117,15 +117,16 @@ class _3D_EXPORT Qgs3D
      * \since QGIS 4.2
      */
     static int materialDataDefinedByteStride( const QgsAbstractMaterialSettings *settings );
-#endif
-
-  private:
-    Qgs3D();
 
     /**
      * Returns the handler to use for a material \a settings.
      */
     static const QgsAbstractMaterial3DHandler *handlerForMaterialSettings( const QgsAbstractMaterialSettings *settings );
+
+#endif
+
+  private:
+    Qgs3D();
 
 #ifdef SIP_RUN
     Qgs3D( const Qgs3D &other );
@@ -140,6 +141,7 @@ class _3D_EXPORT Qgs3D
     std::unique_ptr< QgsAbstractMaterial3DHandler > mSimpleLineMaterialHandler;
     std::unique_ptr< QgsAbstractMaterial3DHandler > mGoochMaterialHandler;
     std::unique_ptr< QgsAbstractMaterial3DHandler > mMetalRoughMaterialHandler;
+    std::unique_ptr< QgsAbstractMaterial3DHandler > mMetalRoughTexturedMaterialHandler;
 };
 
 #endif // QGS3D_H

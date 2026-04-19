@@ -20,6 +20,8 @@
 #include "qgsmetalroughmaterialsettings.h"
 
 #include <QString>
+#include <Qt3DCore/QEntity>
+#include <Qt3DRender/QParameter>
 
 using namespace Qt::StringLiterals;
 
@@ -41,6 +43,7 @@ QgsMaterial *QgsMetalRoughMaterial3DHandler::toMaterial( const QgsAbstractMateri
       }
 
       QgsMetalRoughMaterial *material = new QgsMetalRoughMaterial;
+      material->setObjectName( u"metalRoughMaterial"_s );
       material->setBaseColor( context.isSelected() ? context.selectionColor() : metalRoughSettings->baseColor() );
       material->setMetalness( std::clamp( metalRoughSettings->metalness(), 0.0, 1.0 ) );
       material->setRoughness( std::clamp( metalRoughSettings->roughness(), 0.0, 1.0 ) );
@@ -64,3 +67,22 @@ QMap<QString, QString> QgsMetalRoughMaterial3DHandler::toExportParameters( const
 
 void QgsMetalRoughMaterial3DHandler::addParametersToEffect( Qt3DRender::QEffect *, const QgsAbstractMaterialSettings *, const QgsMaterialContext & ) const
 {}
+
+bool QgsMetalRoughMaterial3DHandler::updatePreviewScene( Qt3DCore::QEntity *sceneRoot, const QgsAbstractMaterialSettings *settings, const QgsMaterialContext & ) const
+{
+  const QgsMetalRoughMaterialSettings *metalRoughSettings = qgis::down_cast< const QgsMetalRoughMaterialSettings * >( settings );
+
+  QgsMaterial *material = sceneRoot->findChild<QgsMaterial *>();
+  if ( material->objectName() != "metalRoughMaterial"_L1 )
+    return false;
+
+  Qt3DRender::QEffect *effect = material->effect();
+
+  if ( Qt3DRender::QParameter *p = findParameter( effect, u"baseColor"_s ) )
+    p->setValue( metalRoughSettings->baseColor() );
+  if ( Qt3DRender::QParameter *p = findParameter( effect, u"metalness"_s ) )
+    p->setValue( metalRoughSettings->metalness() );
+  if ( Qt3DRender::QParameter *p = findParameter( effect, u"roughness"_s ) )
+    p->setValue( metalRoughSettings->roughness() );
+  return true;
+}

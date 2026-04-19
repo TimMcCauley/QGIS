@@ -16,14 +16,21 @@
 #include "qgsmetalroughmaterialwidget.h"
 
 #include "qgis.h"
+#include "qgsdoublespinbox.h"
 #include "qgsmetalroughmaterialsettings.h"
 
+#include <QString>
+
 #include "moc_qgsmetalroughmaterialwidget.cpp"
+
+using namespace Qt::StringLiterals;
 
 QgsMetalRoughMaterialWidget::QgsMetalRoughMaterialWidget( QWidget *parent, bool )
   : QgsMaterialSettingsWidget( parent )
 {
   setupUi( this );
+  mPreviewWidget->hide();
+  mPreviewWidget->setMaterialType( u"metalrough"_s );
 
   QgsMetalRoughMaterialSettings defaultMaterial;
   setSettings( &defaultMaterial, nullptr );
@@ -41,6 +48,8 @@ QgsMetalRoughMaterialWidget::QgsMetalRoughMaterialWidget( QWidget *parent, bool 
     updateWidgetState();
     emit changed();
   } );
+
+  connect( this, &QgsMetalRoughMaterialWidget::changed, this, &QgsMetalRoughMaterialWidget::updatePreview );
 }
 
 QgsMaterialSettingsWidget *QgsMetalRoughMaterialWidget::create()
@@ -63,17 +72,32 @@ void QgsMetalRoughMaterialWidget::setSettings( const QgsAbstractMaterialSettings
   mPropertyCollection = settings->dataDefinedProperties();
 
   updateWidgetState();
+  updatePreview();
 }
 
-QgsAbstractMaterialSettings *QgsMetalRoughMaterialWidget::settings()
+std::unique_ptr<QgsAbstractMaterialSettings> QgsMetalRoughMaterialWidget::settings()
 {
   auto m = std::make_unique<QgsMetalRoughMaterialSettings>();
   m->setBaseColor( mButtonBaseColor->color() );
   m->setMetalness( mMetalnessWidget->value() );
   m->setRoughness( mRoughnessWidget->value() );
   m->setDataDefinedProperties( mPropertyCollection );
-  return m.release();
+  return m;
+}
+
+void QgsMetalRoughMaterialWidget::setPreviewVisible( bool visible )
+{
+  mPreviewWidget->setVisible( visible );
+  updatePreview();
 }
 
 void QgsMetalRoughMaterialWidget::updateWidgetState()
 {}
+
+void QgsMetalRoughMaterialWidget::updatePreview()
+{
+  if ( mPreviewWidget->isHidden() )
+    return;
+  const std::unique_ptr<QgsAbstractMaterialSettings> newSettings( settings() );
+  mPreviewWidget->updatePreview( newSettings.get() );
+}
